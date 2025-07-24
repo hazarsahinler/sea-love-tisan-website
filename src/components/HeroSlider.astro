@@ -1,0 +1,35 @@
+---
+// Dosya Yolu: src/components/HeroSlider.astro
+import { SanityDocument } from "@sanity/client";
+import sanityClient from "../lib/sanityClient";
+import { urlFor } from "../lib/image";
+
+const query = `*[_type == "galeri" && anaSayfaSliderdaGoster == true]{ resim, aciklama }`;
+const sliderImages: SanityDocument[] = await sanityClient.fetch(query);
+---
+
+<div class="relative w-full h-[85vh] bg-gray-200">
+  <div class="swiper hero-swiper h-full w-full">
+    <div class="swiper-wrapper">
+      {sliderImages.map(image => (
+        <div class="swiper-slide">
+          <img 
+            src={urlFor(image.resim).width(1920).height(1080).quality(95).url()} 
+            alt={image.aciklama || 'Sea Love Tisan tekne turu manzarası'}
+            class="w-full h-full object-cover"
+          />
+        </div>
+      ))}
+    </div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+  </div>
+</div>
+
+<style is:global>
+  .swiper-button-next,
+  .swiper-button-prev {
+    color: white;
+    --swiper-navigation-size: 40px;
+  }
+</style>

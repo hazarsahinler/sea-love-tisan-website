@@ -1,0 +1,36 @@
+---
+import Header from '../components/Header.astro'; // YENİ
+import Footer from '../components/Footer.astro'; // YENİ
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+
+// Tailwind'in temel direktifleri (bu zaten olmalı)
+import '../styles/global.css';
+---
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Tisan'da unutulmaz tekne turları. Sea Love Tisan ile en güzel koyları keşfedin." />
+    <meta name="viewport" content="width=device-width" />
+<link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="bg-gray-100 text-gray-800">
+    
+    
+
+    <Header /> <!-- YENİ -->
+
+    <slot /> <!-- Bu, her sayfanın kendi içeriğinin geleceği yerdir -->
+
+    <Footer /> <!-- YENİ -->
+        <script src="../scripts/slider.js"></script>
+
+
+  </body>
+</html>

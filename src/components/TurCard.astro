@@ -1,0 +1,52 @@
+---
+import type { SanityDocument } from '@sanity/client';
+import { urlFor } from '../lib/image';
+
+interface Props {
+  tur: SanityDocument;
+}
+const { tur } = Astro.props;
+---
+
+<!-- Kartın tamamını bir flex container yapıyoruz -->
+<div class="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-full transition-transform duration-300 hover:transform hover:-translate-y-2">
+  
+  <!-- Resim Alanı -->
+  <div class="relative">
+    {tur.kapakFotografi ? (
+      <img
+        class="w-full h-56 object-cover"
+        src={urlFor(tur.kapakFotografi).width(400).height(300).url()}
+        alt={tur.turAdi}
+      />
+    ) : (
+      <div class="w-full h-56 bg-gray-200 flex items-center justify-center">
+        <p class="text-gray-400">Resim Yok</p>
+      </div>
+    )}
+  </div>
+  
+  <!-- İçerik Alanı -->
+  <div class="p-6 flex flex-col flex-grow">
+    <h3 class="text-xl font-bold text-gray-800 mb-2">{tur.turAdi || 'İsimsiz Tur'}</h3>
+    
+    {tur.fiyat != null && (
+      <p class="text-lg font-semibold text-cyan-600 mb-4">{tur.fiyat} TL / Kişi Başı</p>
+    )}
+    
+    <!-- flex-grow, bu paragrafın mevcut tüm boş alanı doldurmasını sağlar -->
+    <p class="text-gray-600 mb-6 flex-grow">
+      {tur.aciklama || 'Açıklama mevcut değil.'}
+    </p>
+    
+    <!-- Buton Alanı (En altta kalacak) -->
+    <div class="mt-auto">
+      <a 
+        href="#" 
+        class="block w-full text-center bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-cyan-600 transition-colors"
+      >
+        Detayları Gör
+      </a>
+    </div>
+  </div>
+</div>
