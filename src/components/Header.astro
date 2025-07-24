@@ -1,16 +1,16 @@
 ---
-// src/components/Header.astro
+// Dosya Yolu: src/components/Header.astro
 import sanityClient from '../lib/sanityClient';
 import type { SanityDocument } from '@sanity/client';
 
+// Header'da göstermek için sadece telefon numarasını çekiyoruz
 const query = `*[_type == "siteAyarlari"][0] { telefonNumarasi }`;
 const settings: SanityDocument = await sanityClient.fetch(query);
 const telefon = settings?.telefonNumarasi || 'Telefon No Girilmemiş';
 ---
-<header 
-  id="main-header"
-  class="sticky top-0 z-50"
->
+
+<!-- Ana Header Konteyneri -->
+<header id="main-header" class="sticky top-0 z-50">
   <div class="container mx-auto px-6">
     <div class="relative bg-white/80 backdrop-blur-sm shadow-lg rounded-b-2xl flex justify-between items-center h-20">
       
@@ -22,24 +22,26 @@ const telefon = settings?.telefonNumarasi || 'Telefon No Girilmemiş';
 
       <!-- Orta Logo -->
       <div class="absolute left-1/2 top-0 -translate-x-1/2">
-        <a href="/" aria-label="Ana Sayfa" 
-           class="block bg-white p-2 rounded-full shadow-xl"
-           style="transform: translateY(-25%);"
-        >
+        <a href="/" aria-label="Ana Sayfa" class="block bg-white p-2 rounded-full shadow-xl" style="transform: translateY(-25%);">
           <img src="/logo.png" alt="Sea Love Tisan Logo" class="h-28 w-28 rounded-full object-cover" />
         </a>
       </div>
 
       <!-- Sağ Taraf Menüsü -->
       <nav class="hidden md:flex items-center gap-6 pr-8 text-sm font-semibold text-gray-700 tracking-wider">
-        <a href="#iletisim" class="hover:text-cyan-600 transition-colors">
-          REZERVASYON
-        </a>
-        <a href="#iletisim" aria-label="Instagram" class="hover:text-cyan-600 transition-colors">
-          SOSYAL MEDYA
-        </a>
+        <a href="/#iletisim" class="hover:text-cyan-600 transition-colors">REZERVASYON</a>
+        
+        <!-- YENİ: PNG İKONLAR -->
+        <div class="flex items-center gap-4 border-l border-gray-300 pl-6">
+          <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Instagram" class="hover:opacity-75 transition-opacity">
+            <img src="/Instagram.png" alt="Instagram Logosu" class="w-6 h-6" />
+          </a>
+          <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Facebook" class="hover:opacity-75 transition-opacity">
+            <img src="/Facebook.png" alt="Facebook Logosu" class="w-6 h-6" />
+          </a>
+        </div>
       </nav>
-
+      
       <!-- Mobil Menü İkonu (Hamburger) -->
       <div class="md:hidden ml-auto pr-6">
         <button id="mobile-menu-button" class="focus:outline-none text-gray-700">
@@ -51,26 +53,42 @@ const telefon = settings?.telefonNumarasi || 'Telefon No Girilmemiş';
   </div>
 </header>
 
-<!-- Mobil Menü (Gizli) - Tasarımı yeni header'a uygun hale getirildi -->
-<div id="mobile-menu" class="hidden fixed top-0 left-0 w-full h-full bg-white z-40 flex flex-col items-center justify-center text-gray-800 text-2xl gap-8">
+<!-- Mobil Menü (Gizli) -->
+<div id="mobile-menu" class="hidden fixed top-0 left-0 w-full h-full bg-white z-40 flex-col items-center justify-center text-gray-800 text-2xl gap-8">
   <a href="/" class="hover:text-cyan-600">ANA SAYFA</a>
   <a href="/#turlar" class="hover:text-cyan-600">TURLAR</a>
-  <a href={`tel:${telefon.replace(/\s/g, '')}`} class="hover:text-cyan-600">REZERVASYON</a>
-  <a href="#" class="hover:text-cyan-600">INSTAGRAM</a>
+  <a href="/#iletisim" class="hover:text-cyan-600">REZERVASYON</a>
+   <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Instagram" class="hover:opacity-75 transition-opacity">
+            <img src="/Instagram.png" alt="Instagram Logosu" class="w-6 h-6" />
+          </a>
+   <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Facebook" class="hover:opacity-75 transition-opacity">
+            <img src="/Facebook.png" alt="Facebook Logosu" class="w-6 h-6" />
+          </a>
+ 
+  
   <button id="mobile-menu-close" class="absolute top-8 right-8 text-4xl text-gray-500">×</button>
 </div>
 
-<script>
-  // Mobil menü açma/kapama scripti aynı kalıyor...
+<!-- Mobil menüyü çalıştıracak script. client:load ile tarayıcıda çalışması garanti edilir. -->
+<script client:load>
   const menuButton = document.getElementById('mobile-menu-button');
   const closeButton = document.getElementById('mobile-menu-close');
   const mobileMenu = document.getElementById('mobile-menu');
+  const menuLinks = mobileMenu?.querySelectorAll('a');
 
   menuButton?.addEventListener('click', () => {
     mobileMenu?.classList.remove('hidden');
+    mobileMenu?.classList.add('flex');
   });
 
-  closeButton?.addEventListener('click', () => {
+  function closeMenu() {
     mobileMenu?.classList.add('hidden');
+    mobileMenu?.classList.remove('flex');
+  }
+
+  closeButton?.addEventListener('click', closeMenu);
+
+  menuLinks?.forEach(link => {
+    link.addEventListener('click', closeMenu);
   });
 </script>
