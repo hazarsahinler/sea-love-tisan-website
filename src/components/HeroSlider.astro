@@ -4,43 +4,62 @@ import { SanityDocument } from "@sanity/client";
 import sanityClient from "../lib/sanityClient";
 import { urlFor } from "../lib/image";
 
-// Hem slider resimlerini hem de site ayarlarındaki video linkini çekiyoruz
+// Hem slider resimlerini, hem de masaüstü ve mobil video linklerini çekiyoruz
 const query = `{
   "sliderImages": *[_type == "galeri" && anaSayfaSliderdaGoster == true]{ resim, aciklama },
-  "ayarlar": *[_type == "siteAyarlari"][0]{ anaSayfaVideoLink }
+  "ayarlar": *[_type == "siteAyarlari"][0]{ anaSayfaVideoLink, mobilAnaSayfaVideoLink }
 }`;
 const data = await sanityClient.fetch(query);
 const sliderImages: SanityDocument[] = data.sliderImages || [];
 const ayarlar: SanityDocument = data.ayarlar || {};
-const videoLink = ayarlar.anaSayfaVideoLink;
+
+const desktopVideoLink = ayarlar.anaSayfaVideoLink;
+const mobileVideoLink = ayarlar.mobilAnaSayfaVideoLink;
 
 // YouTube linkinden video ID'sini çıkaran yardımcı fonksiyon
 function getYouTubeId(url: string | undefined) {
   if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
+  const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
   return (match && match[2].length === 11) ? match[2] : null;
 }
-const videoId = getYouTubeId(videoLink);
+
+const desktopVideoId = getYouTubeId(desktopVideoLink);
+// Eğer mobil video linki yoksa, yedek olarak masaüstü videosunu kullan
+const mobileVideoId = getYouTubeId(mobileVideoLink) || desktopVideoId; 
 ---
 
-<!-- Ana Konteyner -->
+<!-- Ana Konteyner: Yüksekliği tüm ekranı kaplayacak şekilde ayarlandı -->
 <section class="relative h-screen w-full bg-black">
   
-  {videoId ? (
-    <!-- EĞER VİDEO LİNKİ VARSA, VİDEOYU GÖSTER -->
-    <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
-      <iframe
-        class="absolute top-1/2 left-1/2 w-[120vw] h-[120vh] min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3`}
-        frameborder="0"
-        allow="autoplay; encrypted-media"
-      ></iframe>
-      <!-- Videonun üzerine hafif bir karartma efekti -->
-      <div class="absolute inset-0 bg-black opacity-30"></div>
-    </div>
+  <!-- EĞER HERHANGİ BİR VİDEO LİNKİ VARSA, VİDEO BÖLÜMLERİNİ GÖSTER -->
+  { (desktopVideoId || mobileVideoId) ? (
+    <>
+      <!-- MOBİL İÇİN VİDEO -->
+      <!-- Bu bölüm sadece tabletten küçük ekranlarda görünür (md:hidden) -->
+      <div class="md:hidden absolute inset-0 overflow-hidden">
+        <iframe
+          class="absolute top-1/2 left-1/2 w-[300vw] sm:w-[200vw] h-[100vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          src={`https://www.youtube.com/embed/${mobileVideoId}?autoplay=1&mute=1&loop=1&playlist=${mobileVideoId}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0`}
+          frameborder="0"
+          allow="autoplay; encrypted-media"
+        ></iframe>
+        <div class="absolute inset-0 bg-black opacity-30"></div>
+      </div>
+
+      <!-- MASAÜSTÜ İÇİN VİDEO -->
+      <!-- Bu bölüm sadece tablet ve üstü ekranlarda görünür (hidden md:block) -->
+      <div class="hidden md:block absolute inset-0 overflow-hidden">
+        <iframe
+          class="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          src={`https://www.youtube.com/embed/${desktopVideoId}?autoplay=1&mute=1&loop=1&playlist=${desktopVideoId}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0`}
+          frameborder="0"
+          allow="autoplay; encrypted-media"
+        ></iframe>
+        <div class="absolute inset-0 bg-black opacity-30"></div>
+      </div>
+    </>
   ) : (
-    <!-- EĞER VİDEO LİNKİ YOKSA, ESKİ SLIDER'I GÖSTER -->
+    <!-- EĞER HİÇ VİDEO LİNKİ YOKSA, RESİM SLIDER'INI GÖSTER -->
     <div class="swiper hero-swiper h-full w-full">
       <div class="swiper-wrapper">
         {sliderImages.map(image => (

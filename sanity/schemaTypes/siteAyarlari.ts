@@ -67,5 +67,12 @@ export default defineType({
     type: 'url',
     description: 'Ana sayfada, resim slider\'ı yerine tam ekran gösterilecek olan YouTube videosunun linki. (Örn: https://www.youtube.com/watch?v=VIDEO_ID)',
   }),
+  // --- YENİ ALAN ---
+  defineField({
+    name: 'mobilAnaSayfaVideoLink',
+    title: 'Ana Sayfa Arka Plan Videosu (Mobil)',
+    type: 'url',
+    description: 'Dikey (9:16) formatındaki YouTube video linki. Reels/Shorts videoları idealdir.',
+  }),
   ],
 })
