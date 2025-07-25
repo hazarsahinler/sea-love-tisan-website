@@ -11,55 +11,71 @@ const query = `{
 }`;
 const data = await sanityClient.fetch(query);
 const sliderImages: SanityDocument[] = data.sliderImages || [];
-const ayarlar: SanityDocument = data.ayarlar || {};
+const ayarlar: SanityDocument = data.ayarlar || { anaSayfaVideoLink: null, mobilAnaSayfaVideoLink: null };
 
-const desktopVideoLink = ayarlar.anaSayfaVideoLink;
-const mobileVideoLink = ayarlar.mobilAnaSayfaVideoLink;
-
-// YouTube linkinden video ID'sini çıkaran yardımcı fonksiyon
-function getYouTubeId(url: string | undefined) {
+// YENİ VE GELİŞTİRİLMİŞ FONKSİYON: "Shorts" linklerini de tanır
+function getYouTubeId(url: string | undefined): string | null {
   if (!url) return null;
-  const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
-  return (match && match[2].length === 11) ? match[2] : null;
+  
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1]; // ID'yi bulduk, geri döndür
+    }
+  }
+
+  return null; // Hiçbir format uymadı
 }
 
-const desktopVideoId = getYouTubeId(desktopVideoLink);
-// Eğer mobil video linki yoksa, yedek olarak masaüstü videosunu kullan
-const mobileVideoId = getYouTubeId(mobileVideoLink) || desktopVideoId; 
+// Yedekleme mantığı olmayan, temiz değişken atamaları
+const desktopVideoId = getYouTubeId(ayarlar.anaSayfaVideoLink);
+const mobileVideoId = getYouTubeId(ayarlar.mobilAnaSayfaVideoLink);
 ---
 
-<!-- Ana Konteyner: Yüksekliği tüm ekranı kaplayacak şekilde ayarlandı -->
+<!-- Ana Konteyner -->
 <section class="relative h-screen w-full bg-black">
   
-  <!-- EĞER HERHANGİ BİR VİDEO LİNKİ VARSA, VİDEO BÖLÜMLERİNİ GÖSTER -->
-  { (desktopVideoId || mobileVideoId) ? (
+  { (desktopVideoId || mobileVideoId || sliderImages.length > 0) ? (
     <>
       <!-- MOBİL İÇİN VİDEO -->
-      <!-- Bu bölüm sadece tabletten küçük ekranlarda görünür (md:hidden) -->
       <div class="md:hidden absolute inset-0 overflow-hidden">
-        <iframe
-          class="absolute top-1/2 left-1/2 w-[300vw] sm:w-[200vw] h-[100vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-          src={`https://www.youtube.com/embed/${mobileVideoId}?autoplay=1&mute=1&loop=1&playlist=${mobileVideoId}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0`}
-          frameborder="0"
-          allow="autoplay; encrypted-media"
-        ></iframe>
+        {mobileVideoId ? (
+          <iframe
+            class="absolute top-1/2 left-1/2 w-[300vw] sm:w-[200vw] h-[100vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            src={`https://www.youtube.com/embed/${mobileVideoId}?autoplay=1&mute=1&loop=1&playlist=${mobileVideoId}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0`}
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+          ></iframe>
+        ) : (
+           <div class="flex items-center justify-center h-full text-white/50">Mobil video ayarlanmamış.</div>
+        )}
         <div class="absolute inset-0 bg-black opacity-30"></div>
       </div>
 
       <!-- MASAÜSTÜ İÇİN VİDEO -->
-      <!-- Bu bölüm sadece tablet ve üstü ekranlarda görünür (hidden md:block) -->
       <div class="hidden md:block absolute inset-0 overflow-hidden">
-        <iframe
-          class="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-          src={`https://www.youtube.com/embed/${desktopVideoId}?autoplay=1&mute=1&loop=1&playlist=${desktopVideoId}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0`}
-          frameborder="0"
-          allow="autoplay; encrypted-media"
-        ></iframe>
+        {desktopVideoId ? (
+          <iframe
+            class="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            src={`https://www.youtube.com/embed/${desktopVideoId}?autoplay=1&mute=1&loop=1&playlist=${desktopVideoId}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0`}
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+          ></iframe>
+        ) : (
+          <div class="flex items-center justify-center h-full text-white/50">Masaüstü videosu ayarlanmamış.</div>
+        )}
         <div class="absolute inset-0 bg-black opacity-30"></div>
       </div>
     </>
   ) : (
-    <!-- EĞER HİÇ VİDEO LİNKİ YOKSA, RESİM SLIDER'INI GÖSTER -->
+    <!-- HİÇBİR İÇERİK YOKSA RESİM SLIDER'I GÖSTER -->
     <div class="swiper hero-swiper h-full w-full">
       <div class="swiper-wrapper">
         {sliderImages.map(image => (
@@ -86,7 +102,6 @@ const mobileVideoId = getYouTubeId(mobileVideoLink) || desktopVideoId;
   import 'swiper/css';
   import 'swiper/css/navigation';
 
-  // Sadece sayfada bir swiper elementi varsa başlat
   if (document.querySelector('.hero-swiper')) {
     new Swiper('.hero-swiper', {
       modules: [Navigation, Autoplay],
