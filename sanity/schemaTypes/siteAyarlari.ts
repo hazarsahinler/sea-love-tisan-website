@@ -20,10 +20,18 @@ export default defineType({
       type: 'string',
       description: 'Uluslararası formatta, boşluksuz yazın (örn: 905321234567).',
     }),
+    // --- YENİ ALANLAR ---
     defineField({
-      name: 'email',
-      title: 'E-posta Adresi',
+      name: 'telefonNumarasi2',
+      title: '2. Telefon Numarası (Görünür)',
       type: 'string',
+      description: 'İkinci hat için. Görünür formatta yazın.',
+    }),
+    defineField({
+      name: 'whatsappNumarasi2',
+      title: '2. WhatsApp Numarası (Tıkla-Ara için)',
+      type: 'string',
+      description: 'İkinci hat için. Uluslararası formatta, boşluksuz yazın.',
     }),
     defineField({
       name: 'instagramUrl',
@@ -36,6 +44,12 @@ export default defineType({
       type: 'url',
     }),
     defineField({
+  name: 'weatherApiKey', // Adını daha genel yapalım
+  title: 'Hava Durumu API Anahtarı (WeatherAPI.com)',
+  type: 'string',
+  description: 'WeatherAPI.com\'dan alınan API anahtarı.'
+}),
+    defineField({
       name: 'adres',
       title: 'İşletme Adresi',
       type: 'string',
@@ -47,5 +61,11 @@ export default defineType({
         type: 'url',
         description: 'Google Haritalar\'dan "Harita yerleştir" seçeneği ile alınan URL\'yi buraya yapıştırın.',
     }),
+     defineField({
+    name: 'anaSayfaVideoLink',
+    title: 'Ana Sayfa Arka Plan Video Linki (YouTube)',
+    type: 'url',
+    description: 'Ana sayfada, resim slider\'ı yerine tam ekran gösterilecek olan YouTube videosunun linki. (Örn: https://www.youtube.com/watch?v=VIDEO_ID)',
+  }),
   ],
 })

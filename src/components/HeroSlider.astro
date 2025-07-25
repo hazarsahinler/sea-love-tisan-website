@@ -4,28 +4,84 @@ import { SanityDocument } from "@sanity/client";
 import sanityClient from "../lib/sanityClient";
 import { urlFor } from "../lib/image";
 
-const query = `*[_type == "galeri" && anaSayfaSliderdaGoster == true]{ resim, aciklama }`;
-const sliderImages: SanityDocument[] = await sanityClient.fetch(query);
+// Hem slider resimlerini hem de site ayarlarındaki video linkini çekiyoruz
+const query = `{
+  "sliderImages": *[_type == "galeri" && anaSayfaSliderdaGoster == true]{ resim, aciklama },
+  "ayarlar": *[_type == "siteAyarlari"][0]{ anaSayfaVideoLink }
+}`;
+const data = await sanityClient.fetch(query);
+const sliderImages: SanityDocument[] = data.sliderImages || [];
+const ayarlar: SanityDocument = data.ayarlar || {};
+const videoLink = ayarlar.anaSayfaVideoLink;
+
+// YouTube linkinden video ID'sini çıkaran yardımcı fonksiyon
+function getYouTubeId(url: string | undefined) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+const videoId = getYouTubeId(videoLink);
 ---
 
-<div class="relative w-full h-[60vh] md:h-[85vh] bg-gray-200">
-  <div class="swiper hero-swiper h-full w-full">
-    <div class="swiper-wrapper">
-      {sliderImages.map(image => (
-        <div class="swiper-slide">
-          <img 
-            src={urlFor(image.resim).width(1920).height(1080).quality(95).url()} 
-            alt={image.aciklama || 'Sea Love Tisan tekne turu manzarası'}
-            class="w-full h-full object-cover"
-          />
-        </div>
-      ))}
+<!-- Ana Konteyner -->
+<section class="relative h-screen w-full bg-black">
+  
+  {videoId ? (
+    <!-- EĞER VİDEO LİNKİ VARSA, VİDEOYU GÖSTER -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+      <iframe
+        class="absolute top-1/2 left-1/2 w-[120vw] h-[120vh] min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3`}
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+      ></iframe>
+      <!-- Videonun üzerine hafif bir karartma efekti -->
+      <div class="absolute inset-0 bg-black opacity-30"></div>
     </div>
-    <div class="swiper-button-prev"></div>
-    <div class="swiper-button-next"></div>
-  </div>
-</div>
+  ) : (
+    <!-- EĞER VİDEO LİNKİ YOKSA, ESKİ SLIDER'I GÖSTER -->
+    <div class="swiper hero-swiper h-full w-full">
+      <div class="swiper-wrapper">
+        {sliderImages.map(image => (
+          <div class="swiper-slide">
+            <img 
+              src={urlFor(image.resim).width(1920).height(1080).quality(95).url()} 
+              alt={image.aciklama || 'Sea Love Tisan tekne turu manzarası'}
+              class="w-full h-full object-cover"
+            />
+          </div>
+        ))}
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  )}
 
+</section>
+
+<!-- Swiper'ı çalıştıracak script (sadece resim slider'ı gösterildiğinde gerekli) -->
+<script client:load>
+  import Swiper from 'swiper';
+  import { Navigation, Autoplay } from 'swiper/modules';
+  import 'swiper/css';
+  import 'swiper/css/navigation';
+
+  // Sadece sayfada bir swiper elementi varsa başlat
+  if (document.querySelector('.hero-swiper')) {
+    new Swiper('.hero-swiper', {
+      modules: [Navigation, Autoplay],
+      loop: true,
+      autoplay: { delay: 4000 },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+    });
+  }
+</script>
+
+<!-- Buton stilleri -->
 <style is:global>
   .swiper-button-next,
   .swiper-button-prev {
