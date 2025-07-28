@@ -1,0 +1,66 @@
+---
+// WeatherWidget.astro
+import type { SanityDocument } from "@sanity/client";
+export interface Props {
+  ayarlar: SanityDocument;
+}
+const { ayarlar } = Astro.props;
+---
+<section id="havadurumu" class="py-20 bg-gray-50">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-3xl md:text-4xl font-bold text-cyan-800 mb-8">Tisan'da Güncel Hava & Deniz Durumu</h2>
+    <!-- Başlangıçta bir "yükleniyor" mesajı gösterelim -->
+    <div id="weather-container">
+      <p class="text-gray-500">Hava durumu bilgisi yükleniyor...</p>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ ayarlar }}>
+  // Bu script, ziyaretçinin tarayıcısında çalışacak
+  async function fetchWeather() {
+    const weatherContainer = document.getElementById('weather-container');
+    const apiKey = ayarlar.weatherApiKey;
+
+    if (!apiKey) {
+      weatherContainer.innerHTML = `<p class="text-gray-500">API anahtarı ayarlanmamış.</p>`;
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=Tisan&days=1&aqi=no&alerts=no&lang=tr`);
+      if (!response.ok) {
+        throw new Error('API yanıtı başarısız');
+      }
+      const data = await response.json();
+
+      // Gelen veriyle HTML'i oluştur
+      const weatherHTML = `
+        <div class="max-w-lg mx-auto bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
+          <div class="flex items-center gap-4">
+            <img src="${data.current.condition.icon}" alt="${data.current.condition.text}" class="w-24 h-24" />
+            <div>
+              <p class="text-6xl font-bold text-gray-800">${Math.round(data.current.temp_c)}°C</p>
+              <p class="text-xl text-gray-600 capitalize">${data.current.condition.text}</p>
+            </div>
+          </div>
+          <div class="w-full border-t my-6"></div>
+          <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 text-gray-600">
+            <div class="text-center"><p class="font-bold text-lg">${Math.round(data.current.feelslike_c)}°C</p><p class="text-sm">Hissedilen</p></div>
+            <div class="text-center"><p class="font-bold text-lg">${(data.current.wind_kph / 3.6).toFixed(1)} m/s</p><p class="text-sm">Rüzgar</p></div>
+            <div class="text-center"><p class="font-bold text-lg">${data.current.humidity}%</p><p class="text-sm">Nem</p></div>
+            <div class="text-center"><p class="font-bold text-lg">${data.forecast.forecastday[0].day.maxwind_kph} km/s</p><p class="text-sm">Maks. Rüzgar</p></div>
+          </div>
+        </div>
+      `;
+      weatherContainer.innerHTML = weatherHTML;
+    } catch (error) {
+      console.error("Hava durumu verisi çekilemedi:", error);
+      weatherContainer.innerHTML = `<p class="text-gray-500">Hava durumu bilgisi şu an için alınamıyor.</p>`;
+    }
+  }
+
+  // Sayfa yüklendiğinde fonksiyonu çalıştır
+  document.addEventListener('astro:page-load', fetchWeather);
+  fetchWeather(); // İlk yüklemede de çalışması için
+</script>

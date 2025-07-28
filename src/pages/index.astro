@@ -2,12 +2,11 @@
 // Dosya Yolu: src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
 import HeroSlider from '../components/HeroSlider.astro';
+import AboutSlider from '../components/AboutSlider.astro';
 import sanityClient from '../lib/sanityClient';
 import { urlFor } from '../lib/image';
 import type { SanityDocument } from '@sanity/client';
 
-// 1. ADIM: Sayfa için gerekli tüm verileri Sanity'den çekiyoruz
-// Sorgu, yeni "weatherApiKey" alanını içerecek şekilde güncellendi.
 const query = `{
   "bilgiKartlari": *[_type == "bilgiKarti"],
   "ayarlar": *[_type == "siteAyarlari"][0]{
@@ -19,7 +18,7 @@ const query = `{
     adres,
     instagramUrl,
     facebookUrl,
-    weatherApiKey, // OpenWeatherMap yerine yeni alan
+    weatherApiKey,
     googleMapsLink
   }
 }`;
@@ -27,13 +26,10 @@ const data = await sanityClient.fetch(query);
 const bilgiKartlari: SanityDocument[] = data.bilgiKartlari || [];
 const ayarlar: SanityDocument = data.ayarlar || {};
 
-// 2. ADIM: Hava durumu verisini YENİ API (WeatherAPI.com) ile çekiyoruz
-const weatherApiKey = ayarlar.weatherApiKey; // Yeni alan adını kullanıyoruz
+const weatherApiKey = ayarlar.weatherApiKey;
 let weatherData = null;
-
 if (weatherApiKey) {
   try {
-    // API adresi ve parametreleri WeatherAPI.com'a göre güncellendi
     const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${weatherApiKey}&q=Tisan&days=1&aqi=no&alerts=no&lang=tr`);
     if (response.ok) {
         weatherData = await response.json();
@@ -50,27 +46,31 @@ if (weatherApiKey) {
   
   <HeroSlider />
 
+  <!-- YENİ: İKİ SÜTUNLU HAKKIMIZDA BÖLÜMÜ -->
   <section id="hakkimizda" class="py-20 bg-white">
-    <div class="container mx-auto px-6 max-w-4xl text-center">
-      <h2 class="text-3xl md:text-4xl font-bold text-cyan-800 mb-6">Deniz Tutkunlarının Buluşma Noktası</h2>
-      <p class="text-lg text-gray-700 leading-relaxed">
-        Yılların verdiği tecrübe ve denize olan sonsuz aşkımızla, sizlere sadece bir tekne turu değil, unutulmaz anılarla dolu bir gün vaat ediyoruz. Tisan'ın el değmemiş koylarında, masmavi suların üzerinde, Akdeniz güneşinin tadını çıkarırken kendinizi özel hissedeceksiniz. Güvenli ve konforlu teknemiz, güler yüzlü ekibimiz ve size özel hazırladığımız ikramlarımızla, her detayı sizin için düşündük. Gelin, bu eşsiz deneyimi Sea Love Tisan farkıyla birlikte yaşayalım.
-      </p>
+    <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <!-- Sol Sütun: Metin -->
+      <div class="text-center lg:text-left">
+        <h2 class="text-3xl md:text-4xl font-bold text-cyan-800 mb-6">Deniz Tutkunlarının Buluşma Noktası</h2>
+        <p class="text-lg text-gray-700 leading-relaxed">
+          Yılların verdiği tecrübe ve denize olan sonsuz aşkımızla, sizlere sadece bir tekne turu değil, unutulmaz anılarla dolu bir gün vaat ediyoruz. Tisan'ın el değmemiş koylarında, masmavi suların üzerinde, Akdeniz güneşinin tadını çıkarırken kendinizi özel hissedeceksiniz. Güvenli ve konforlu teknemiz, güler yüzlü ekibimiz ve size özel hazırladığımız ikramlarımızla, her detayı sizin için düşündük. Gelin, bu eşsiz deneyimi Sea Love Tisan farkıyla birlikte yaşayalım.
+        </p>
+      </div>
+      <!-- Sağ Sütun: Resim Slider'ı -->
+      <div class="w-full h-80 md:h-96">
+        <AboutSlider />
+      </div>
     </div>
   </section>
 
-  <!-- Hava Durumu Bölümü (WeatherAPI.com'dan Gelen Yeni Veriyle Güncellendi) -->
+  <!-- Hava Durumu Bölümü -->
   <section id="havadurumu" class="py-20 bg-gray-50">
     <div class="container mx-auto px-6 text-center">
       <h2 class="text-3xl md:text-4xl font-bold text-cyan-800 mb-8">Tisan'da Güncel Hava & Deniz Durumu</h2>
       {weatherData && weatherData.current ? (
         <div class="max-w-lg mx-auto bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
           <div class="flex items-center gap-4">
-            <img 
-              src={weatherData.current.condition.icon}
-              alt={weatherData.current.condition.text} 
-              class="w-24 h-24"
-            />
+            <img src={weatherData.current.condition.icon} alt={weatherData.current.condition.text} class="w-24 h-24" />
             <div>
               <p class="text-6xl font-bold text-gray-800">{Math.round(weatherData.current.temp_c)}°C</p>
               <p class="text-xl text-gray-600 capitalize">{weatherData.current.condition.text}</p>
@@ -78,22 +78,10 @@ if (weatherApiKey) {
           </div>
           <div class="w-full border-t my-6"></div>
           <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 text-gray-600">
-            <div class="text-center">
-              <p class="font-bold text-lg">{Math.round(weatherData.current.feelslike_c)}°C</p>
-              <p class="text-sm">Hissedilen</p>
-            </div>
-            <div class="text-center">
-              <p class="font-bold text-lg">{(weatherData.current.wind_kph / 3.6).toFixed(1)} m/s</p>
-              <p class="text-sm">Rüzgar</p>
-            </div>
-            <div class="text-center">
-              <p class="font-bold text-lg">{weatherData.current.humidity}%</p>
-              <p class="text-sm">Nem</p>
-            </div>
-            <div class="text-center">
-              <p class="font-bold text-lg">{weatherData.forecast.forecastday[0].day.maxwind_kph} km/s</p>
-              <p class="text-sm">Maks. Rüzgar</p>
-            </div>
+            <div class="text-center"><p class="font-bold text-lg">{Math.round(weatherData.current.feelslike_c)}°C</p><p class="text-sm">Hissedilen</p></div>
+            <div class="text-center"><p class="font-bold text-lg">{(weatherData.current.wind_kph / 3.6).toFixed(1)} m/s</p><p class="text-sm">Rüzgar</p></div>
+            <div class="text-center"><p class="font-bold text-lg">{weatherData.current.humidity}%</p><p class="text-sm">Nem</p></div>
+            <div class="text-center"><p class="font-bold text-lg">{weatherData.forecast.forecastday[0].day.maxwind_kph} km/s</p><p class="text-sm">Maks. Rüzgar</p></div>
           </div>
         </div>
       ) : (
@@ -106,24 +94,16 @@ if (weatherApiKey) {
   <section id="tisan-hakkinda" class="py-20 bg-white">
     <div class="container mx-auto px-6 max-w-7xl">
       <h2 class="text-3xl md:text-4xl font-bold text-center text-cyan-800 mb-12">Tisan Hakkında Bilgiler</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {bilgiKartlari.length > 0 ? (
-          bilgiKartlari.map(kart => (
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2">
-              <img 
-                src={urlFor(kart.resim).width(400).height(250).url()} 
-                alt={kart.baslik}
-                class="w-full h-48 object-cover"
-              />
-              <div class="p-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-3">{kart.baslik}</h3>
-                <p class="text-gray-600 leading-relaxed">{kart.aciklama}</p>
-              </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {bilgiKartlari.map(kart => (
+          <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2">
+            <img src={urlFor(kart.resim).width(400).height(250).url()} alt={kart.baslik} class="w-full h-48 object-cover"/>
+            <div class="p-6">
+              <h3 class="text-xl font-bold text-gray-800 mb-3">{kart.baslik}</h3>
+              <p class="text-gray-600 leading-relaxed">{kart.aciklama}</p>
             </div>
-          ))
-        ) : (
-          <p class="col-span-full text-center text-gray-500">Gösterilecek bilgi bulunamadı.</p>
-        )}
+          </div>
+        ))}
       </div>
     </div>
   </section>
