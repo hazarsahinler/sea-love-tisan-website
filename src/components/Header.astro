@@ -1,7 +1,6 @@
 ---
 // Dosya Yolu: src/components/Header.astro
 // Bu bileşen artık Sanity'den veri çekmiyor, linkler sabit.
-// Bu, sayfa yükleme hızını (performans) artırır.
 ---
 
 <!-- Ana Header Konteyneri -->
@@ -9,13 +8,21 @@
   <div class="container mx-auto px-4">
     <div class="relative bg-white/90 backdrop-blur-md shadow-lg rounded-b-xl flex justify-between items-center h-16">
       
-      <!-- Sol Taraf Menüsü (Sadece masaüstünde görünür) -->
-      <nav class="hidden md:flex items-center gap-5 pl-4 text-sm font-semibold text-gray-700 tracking-wider">
-        <a href="/" class="hover:text-cyan-600 transition-colors">ANA SAYFA</a>
-        <a href="/#havadurumu" class="hover:text-cyan-600 transition-colors">TİSAN'DA HAVA NASIL?</a>
-        <a href="/#tisan-hakkinda" class="hover:text-cyan-600 transition-colors">TİSAN'DA KARŞILAŞACAKLARINIZ</a>
-      </nav>
-
+      <!-- Sol Taraf (w-1/3) -->
+      <div class="w-1/3">
+        <!-- Mobil: Hamburger Menü -->
+        <div class="md:hidden">
+            <button id="mobile-menu-button" class="p-4 -ml-4 focus:outline-none text-gray-700" aria-label="Menüyü aç">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+        <!-- Masaüstü: Sol Menü -->
+        <nav class="hidden md:flex items-center gap-5 pl-4 text-sm font-semibold text-gray-700 tracking-wider">
+          <a href="/" class="hover:text-cyan-600 transition-colors">ANA SAYFA</a>
+          <a href="/#havadurumu" class="hover:text-cyan-600 transition-colors">HAVA DURUMU</a>
+        </nav>
+      </div>
+      
       <!-- Orta Logo -->
       <div class="absolute left-1/2 top-0 -translate-x-1/2">
         <a href="/" aria-label="Ana Sayfa" class="block bg-white p-2 rounded-full shadow-xl" style="transform: translateY(-25%);">
@@ -23,99 +30,71 @@
         </a>
       </div>
 
-      <!-- Sağ Taraf Alanı -->
-      <div class="flex items-center ml-auto">
-        <!-- Sağ Menü (Sadece masaüstünde görünür) -->
-        <nav class="hidden md:flex items-center gap-5 pr-4 text-sm font-semibold text-gray-700 tracking-wider">
-          <a href="/#iletisim" class="hover:text-cyan-600 transition-colors">REZERVASYON</a>
-          <div class="flex items-center gap-4 border-l border-gray-300 pl-5">
+      <!-- Sağ Taraf (w-1/3) -->
+      <div class="w-1/3">
+        <!-- Masaüstü: Sağ Menü -->
+        <nav class="hidden md:flex justify-end items-center gap-5 pr-4 text-sm font-semibold text-gray-700 tracking-wider">
+          <a href="/#tisan-hakkinda" class="hover:text-cyan-600 transition-colors">TİSAN HAKKINDA</a>
+          <a href="/#iletisim" class="bg-cyan-600 text-white px-4 py-2 rounded-full hover:bg-cyan-700 transition-colors">REZERVASYON</a>
+           <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Instagram" class="hover:opacity-75 transition-opacity">
+              <img src="/Instagram.png" alt="Instagram Logosu" class="w-6 h-6" />
+            </a>
+            <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Facebook" class="hover:opacity-75 transition-opacity">
+              <img src="/Facebook.png" alt="Facebook Logosu" class="w-6 h-6" />
+            </a>
+        </nav>
+          <!-- Sosyal İkonlar (Her Zaman Görünür) -->
+        
+        
+        <!-- Mobil: Sadece Sosyal İkonlar -->
+        <div class="flex md:hidden justify-end items-center gap-3 pr-2">
             <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Instagram" class="hover:opacity-75 transition-opacity">
               <img src="/Instagram.png" alt="Instagram Logosu" class="w-6 h-6" />
             </a>
             <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Facebook" class="hover:opacity-75 transition-opacity">
               <img src="/Facebook.png" alt="Facebook Logosu" class="w-6 h-6" />
             </a>
-          </div>
-        </nav>
-        
-        <!-- Hamburger Menü Butonu (Sadece mobilde görünür) -->
-        <div class="md:hidden">
-            <button id="mobile-menu-button" class="p-4 -mr-4 focus:outline-none text-gray-700" aria-label="Menüyü aç">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
-        </div>
+        </div> 
       </div>
     </div>
   </div>
+
+  <!-- MOBİL İÇİN SABİT REZERVASYON BUTONU -->
+  <div class="md:hidden fixed bottom-0 left-0 w-full bg-gradient-to-t from-white to-transparent p-4 z-40">
+      <a href="/#iletisim" class="block w-full text-center bg-cyan-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg text-lg">
+        Rezervasyon Yap
+      </a>
+  </div>
+
 </header>
 
 <!-- Tam Ekran Mobil Menü (Gizli, animasyonlu) -->
-<div id="mobile-menu" class="fixed top-0 left-0 w-full h-full bg-white z-40 flex flex-col items-center justify-center text-gray-800 text-2xl font-bold gap-8 transition-transform duration-300 ease-in-out -translate-y-full">
-  <a href="/" class="menu-link opacity-0 animate-fade-in-down" style="animation-delay: 100ms;">ANA SAYFA</a>
-  <a href="/#havadurumu" class="menu-link opacity-0 animate-fade-in-down" style="animation-delay: 200ms;">TİSAN'DA HAVA NASIL?</a>
-  <a href="/#tisan-hakkinda" class="menu-link opacity-0 animate-fade-in-down" style="animation-delay: 300ms;">TİSAN'DA KARŞILAŞACAKLARINIZ</a>
-  <a href="/#iletisim" class="menu-link opacity-0 animate-fade-in-down" style="animation-delay: 400ms;">REZERVASYON</a>
-  
-  <div class="flex items-center gap-6 pt-8 opacity-0 animate-fade-in-down" style="animation-delay: 500ms;">
-    <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Instagram">
-      <img src="/Instagram.png" alt="Instagram Logosu" class="w-8 h-8" />
-    </a>
-    <a href="https://www.instagram.com/sea_love_tisan/" target="_blank" rel="noopener noreferrer" title="Facebook">
-      <img src="/Facebook.png" alt="Facebook Logosu" class="w-8 h-8" />
-    </a>
-  </div>
-  
+<div id="mobile-menu" class="fixed top-0 left-0 w-full h-full bg-white z-[60] flex flex-col items-center justify-center text-gray-800 text-3xl font-bold gap-8 transition-transform duration-300 ease-in-out -translate-y-full">
+  <a href="/" class="menu-link">ANA SAYFA</a>
+  <a href="/#havadurumu" class="menu-link">HAVA DURUMU</a>
+  <a href="/#tisan-hakkinda" class="menu-link">TİSAN HAKKINDA</a>
   <button id="mobile-menu-close" class="absolute top-6 right-6 text-4xl text-gray-500">×</button>
 </div>
 
 <!-- Gerekli CSS Animasyonları ve Script -->
-<style>
-  @keyframes fade-in-down {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .animate-fade-in-down {
-    animation: fade-in-down 0.5s ease-out forwards;
-  }
-</style>
-
 <script client:load>
   const menuButton = document.getElementById('mobile-menu-button');
   const closeButton = document.getElementById('mobile-menu-close');
   const mobileMenu = document.getElementById('mobile-menu');
   const menuLinks = mobileMenu?.querySelectorAll('.menu-link');
 
-  // Menüyü açan fonksiyon
-  function openMenu() {
-    mobileMenu?.classList.remove('-translate-y-full');
-  }
+  function openMenu() { mobileMenu?.classList.remove('-translate-y-full'); }
+  function closeMenu() { mobileMenu?.classList.add('-translate-y-full'); }
 
-  // Menüyü kapatan fonksiyon
-  function closeMenu() {
-    mobileMenu?.classList.add('-translate-y-full');
-  }
-
-  // Hamburger butonu için "toggle" (aç/kapat) mantığı
   menuButton?.addEventListener('click', () => {
-    // Eğer menü zaten kapalıysa (yani -translate-y-full class'ına sahipse), aç.
     if (mobileMenu?.classList.contains('-translate-y-full')) {
       openMenu();
     } else {
-      // Değilse (yani açıksa), kapat.
       closeMenu();
     }
   });
 
-  // Kapatma butonuna tıklandığında her zaman kapat
   closeButton?.addEventListener('click', closeMenu);
-
-  // Menüdeki bir linke tıklandığında da kapat
   menuLinks?.forEach(link => {
     link.addEventListener('click', closeMenu);
   });
