@@ -1,26 +1,18 @@
 ---
 // Dosya Yolu: src/components/WeatherWidget.astro
-// Bu bileşenin amacı, hava durumu verisini tarayıcıda çekmek ve göstermektir.
 ---
 <section id="havadurumu" class="py-20 bg-gray-50">
   <div class="container mx-auto px-6 text-center">
     <h2 class="text-3xl md:text-4xl font-bold text-cyan-800 mb-8">Tisan'da Güncel Hava & Deniz Durumu</h2>
-    
-    <!-- Bu div, aşağıdaki script tarafından dinamik olarak doldurulacak -->
     <div id="weather-container" class="max-w-lg mx-auto min-h-[240px] flex items-center justify-center">
       <p class="text-gray-500">Hava durumu bilgisi yükleniyor...</p>
     </div>
-
   </div>
 </section>
 
 <script>
-  // Bu script, sadece bu bileşen sayfada göründüğünde ve sayfa yüklendiğinde çalışır.
   async function fetchWeather() {
     const weatherContainer = document.getElementById('weather-container');
-    
-    // API anahtarını Astro'nun güvenli ortam değişkenlerinden alıyoruz
-    // Bu değişkenin Netlify'da PUBLIC_WEATHER_API_KEY olarak tanımlanması gerekir.
     const apiKey = import.meta.env.PUBLIC_WEATHER_API_KEY;
 
     if (!apiKey) {
@@ -29,7 +21,9 @@
     }
 
     try {
-      const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=Tisan&days=1&aqi=no&alerts=no&lang=tr`);
+      // SORGULAMA ARTIK KOORDİNAT ÜZERİNDEN YAPILIYOR
+      const response = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=36.158,33.691&days=1&aqi=no&alerts=no&lang=tr`);
+      
       if (!response.ok) {
         throw new Error(`API yanıtı başarısız: ${response.statusText}`);
       }
@@ -62,8 +56,6 @@
     }
   }
   
-  // Sayfa yüklendiğinde fonksiyonu çalıştır
   document.addEventListener('astro:page-load', fetchWeather);
-  // İlk yükleme için de (eğer event kaçırılırsa diye) çalıştır
   fetchWeather();
 </script>
